@@ -1,7 +1,28 @@
 # RNA Editing Shiny App for plotting and subsetting
-
 source("data_prep.R")
-source("PlottingFunctions.R")
+# source("PlottingFunctions.R")
+
+
+#libraries
+library(shiny)
+library(igvShiny)
+library(htmlwidgets)
+library(htmlwidgets)
+library(data.table)
+library(shinyWidgets)
+library(dplyr)
+
+#----------------------------------------------------------------------------------------------------
+# we need a local directory to write files - for instance, a vcf file representing a genomic
+# region of interest.  we then tell shiny about that directory, so that shiny's built-in http server
+# can serve up files we write there, ultimately consumed by igv.js
+if(!dir.exists("tracks"))
+  dir.create("tracks")
+addResourcePath("tracks", "tracks")
+
+
+
+#----------------------------------------------------------------------------------------------------
 
 # Define UI for data upload app ----
 ui <- fluidPage(
@@ -25,26 +46,42 @@ ui <- fluidPage(
                           plotOutput("plot2")))
              ),
              tabPanel("Manhattan",
-                      h4("Zoom into a locus by selecting a window and double clicking."),
-                             fluidRow(
-                               column(width = 10,
-                                      plotOutput("manhattan", height = 600,
-                                                 dblclick = "manhattan_dblclick",
-                                                 brush = brushOpts(
-                                                   id = "manhattan_brush",
-                                                   resetOnNew = TRUE
-                                                 )
-                                      )
-                               ),
-                             )
+                      fluidRow(
+                        #add Tracks tracks
+                          actionButton("addGWASTrackButton", "Add GWAS Track"),
+                          actionButton("addGWASCatalogTrackButton", "Add GWAS Catalog Track"),
+                          dropdownButton(
+                                inputId = "mydropdown",
+                                label="eQTL Tissues",
+                                icon=NULL,
+                                inline = TRUE,
+                                circle=FALSE,
+                                
+                                ##drop down menu
+                                selectInput("selectEQTLtissueTrack", "Add eQTL Tissue track",
+                                                  lapply(1:length(eQTL_tissues), function(i) {
+                                                    choices= eQTL_tissues[i] =  eQTL_tissues[i]})
+                                )),
+                                
+                          # remove tracks
+                          actionButton("removeUserTracksButton", "Remove All Tracks"),
+                          br(),
+                         
+                        #lads IGV tracks 
+                          igvShinyOutput('igvShiny_tracks'),
+                          br(),
+                          br()
+                       )
              ),
              tabPanel("Circos",
                       verbatimTextOutput("circos")
              )
              ))
-  
+ 
+ 
 # Define server logic to read selected file ----
-server <- function(input, output) {
+server <- function(input, output, session) {
+  #### ----------------Summary  Tab -----------------------------
   p1 <- ggplot(fuma_snps_df, aes(factor(GenomicLocus), fill=func)) + geom_bar(position="stack") + theme_classic() + xlab("Genomic Loci") + theme(axis.text.x = element_text(size=10, angle=90))
   p2 <- ggplot(fuma_snps_df, aes(func, CADD, fill=func)) + geom_boxplot() + theme_classic() + theme(axis.text.x = element_text(angle=90)) + xlab("")
   p3 <- ggplot(fuma_snps_df, aes(func, minChrState, fill=func)) + geom_boxplot() + theme_classic() + theme(axis.text.x = element_text(angle=90)) + xlab("")
@@ -76,7 +113,6 @@ server <- function(input, output) {
   })
   
   output$downFile <- downloadHandler(
-    
     filename = function() {
       paste0(input$plotType, "_", gsub("-", "", Sys.Date()), sep=".pdf")
     },
@@ -86,10 +122,114 @@ server <- function(input, output) {
       dev.off()
     }
   )
-  output$manhattan <- renderPlot({
-    gg.manhattan(gwas, threshold=1e-6, hlight=NULL, col=mypalette, xlims=ranges$x, ylims=c(0,9), title="")
+  
+  
+  
+  #### ----------------Manhattan Tab -----------------------------
+  #add tracks
+  #manhattan plot
+  observeEvent(input$addGWASTrackButton, {
+    print("____Adding GWAS Track ____")
+    showGenomicRegion(session, id="igvShiny_tracks", "all")
+    loadGwasTrack(session, 
+                  id="igvShiny_tracks", 
+                  trackName="GWAS", 
+                  tbl=new_gwas, 
+                  ymin= -log10(max(new_gwas$P)),
+                  ymax= -log10(min(new_gwas$P)),
+                  deleteTracksOfSameName=FALSE)
   })
   
+  #GWAS Catalog plot
+  observeEvent(input$addGWASCatalogTrackButton, {
+    print("____Adding GWAS Catalog ____")
+    loadBedTrack(session, id="igvShiny_tracks", trackName="GWAS Catalog", tbl=gwasCatalog, color="green", deleteTracksOfSameName=FALSE);
+    })
+  
+  #eQTL tissue track
+  observeEvent(input$selectEQTLtissueTrack,{
+    print("____Adding eQTL Track ____")
+    tissue <- input$selectEQTLtissueTrack
+    tissue<-tissue[length(tissue)]
+    print(tissue)
+    index <- which(fuma_eqtl$tissue==tissue)
+    loadGwasTrack(session, id="igvShiny_tracks", trackName=paste0("eQTL Tissue: ", tissue), tbl=fuma_eqtl[index, ], deleteTracksOfSameName=FALSE)
+    # updateCheckboxInput(session, inputId = "selectEQTLtissueTrack", value = FALSE) #resets checkboxes
+    
+  })
+
+  # Remove Tracks 
+  observeEvent(input$removeUserTracksButton, {
+    removeUserAddedTracks(session, id="igvShiny_tracks")
+    removeUserAddedTracks(session, id="selectEQTLtissueTrack")
+    updateCheckboxInput(session, inputId = "selectEQTLtissueTrack", value = FALSE) #resets checkboxes
+  }) 
+  
+ 
+  
+  
+
+
+  # # manhattan plot & GWAS Catalog (this will load by default)
+  # observeEvent(input$igvReady, {
+  #   containerID <- input$igvReady
+  #   showGenomicRegion(session, id="igvShiny_tracks", "all")
+  #   loadGwasTrack(session, id="igvShiny_tracks", trackName="Manhattan Plot", tbl=new_gwas, deleteTracksOfSameName=TRUE)
+  #   # loadBedTrack(session, id="igvShiny_tracks", trackName="GWAS Catalog", tbl=gwasCatalog, color="green", deleteTracksOfSameName=TRUE)
+  # })
+
+  # Pop up info box
+  observeEvent(input$trackClick, { #add popup window when a SNP is clicked
+    printf("--- igv-trackClick popup")
+    x <- input$trackClick
+    print(length(x))
+    print(x)
+    maxCols=length(x)/2
+
+    if (length(x)>14 && x[15]=="GTEX"){ #add GTEX protal hyperlink
+      x[16] <- paste0("<a href='",x[16],"'>", x[4]," URL</a>")
+    }
+    if (length(x)>8 &&x[9]=="PUBMEDID"){ #add hyperlink to pubmed
+      x[10]<- paste0("<a href='https://pubmed.ncbi.nlm.nih.gov/",x[10],"'>", x[10],"</a>") 
+      x[11] <- "Chr"
+    }
+    
+    attribute.name.positions <- grep("name", names(x))
+    attribute.value.positions <- grep("value", names(x))
+    attribute.names <- as.character(x)[attribute.name.positions][1:maxCols] #if different SNPs points overlap, one click will list several of them
+    attribute.values <- as.character(x)[attribute.value.positions][1:maxCols]
+   
+    tbl <- data.frame(name=attribute.names,
+                      value=attribute.values,
+                      stringsAsFactors=FALSE)
+
+    dialogContent <- renderTable(tbl,
+                                 striped=TRUE,
+                                 hover=TRUE,
+                                 aliged="c",
+                                 bordered = TRUE,
+                                 width="100%",
+                                 sanitize.text.function = function(x) x)
+
+    html <- HTML(dialogContent())
+    showModal(modalDialog(html,
+                          size="m",
+                          title="SNP info",
+                          easyClose=TRUE))
+  })
+  
+  # render IGV 
+  output$igvShiny_tracks <- renderIgvShiny({
+    cat("--- starting renderIgvShiny\n");
+    genomeOptions <- parseAndValidateGenomeSpec(genomeName="hg38",  initialLocus="all")
+    igvShiny(genomeOptions)
+  })
+  
+  
+
+  
+
+ #-----------------------------------------------------------
   # When a double-click happens, check if there's a brush on the plot.
   # If so, zoom to the brush bounds; if not, reset the zoom.
   ranges <- reactiveValues(x = NULL, y = NULL)
