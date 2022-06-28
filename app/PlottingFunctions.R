@@ -4,6 +4,7 @@ library(data.table)
 library(DT)
 library(ggplot2)
 library(ggpubr)
+library(ggrepel)
 library(maftools)
 options(shiny.maxRequestSize=1000*1024^2)
 

@@ -1,7 +1,8 @@
 # RNA Editing Shiny App for plotting and subsetting
 
-source("data_prep.R")
-source("PlottingFunctions.R")
+setwd("/Users/adammark/projects/shiny/shinyGWAS")
+source("app/data_prep.R")
+source("app/PlottingFunctions.R")
 
 # Define UI for data upload app ----
 ui <- fluidPage(
@@ -15,13 +16,14 @@ ui <- fluidPage(
                                selectInput("plotType", "Plot Type",
                                            c("minChrState" = "minChrState",
                                              "CADD Score" = "CADD",
-                                             "negLogP" = "negLogP")),
-                               # actionButton(
-                               #   inputId = "plot_now",
-                               #   label = "Plot"
-                               # ),
+                                             "negLogP" = "negLogP"))
+                               ),
+                        column(width = 4,
+                               selectInput("gl", "Genomic Loci",
+                                           c("All", sort(unique(fuma_snps_df$GenomicLocus))))),
+                        column(width = 4,
                                downloadButton('downFile',"Save Plot")),
-                        column(width = 8,
+                        column(width = 12,
                           plotOutput("plot2")))
              ),
              tabPanel("Manhattan",
@@ -39,23 +41,34 @@ ui <- fluidPage(
                              )
              ),
              tabPanel("Circos",
-                      verbatimTextOutput("circos")
+                      fluidRow(
+                        column(width = 12,
+                               plotOutput("circos", height = 800))),
+                      fluidRow(
+                        column(width = 4,
+                               selectInput("chromosome", "Chromosome",
+                                           c(seq(1,22), "X", "Y", "MT")),
+                               downloadButton('downLoadCircos',"Save Plot")),
+                        )
              )
-             ))
+             )
+             )
   
 # Define server logic to read selected file ----
 server <- function(input, output) {
-  p1 <- ggplot(fuma_snps_df, aes(factor(GenomicLocus), fill=func)) + geom_bar(position="stack") + theme_classic() + xlab("Genomic Loci") + theme(axis.text.x = element_text(size=10, angle=90))
-  p2 <- ggplot(fuma_snps_df, aes(func, CADD, fill=func)) + geom_boxplot() + theme_classic() + theme(axis.text.x = element_text(angle=90)) + xlab("")
-  p3 <- ggplot(fuma_snps_df, aes(func, minChrState, fill=func)) + geom_boxplot() + theme_classic() + theme(axis.text.x = element_text(angle=90)) + xlab("")
-  p4 <- ggplot(fuma_snps_df, aes(func, negLogP, fill=func)) + geom_boxplot() + theme_classic() + theme(axis.text.x = element_text(angle=90)) + xlab("")
   
-  # plotnow <- eventReactive(input$plot_now, {
-  # 
-  # })
+  p1 <- ggplot(fuma_snps_df, aes(factor(GenomicLocus), fill=func)) + geom_bar(position="stack") + theme_classic() + xlab("Genomic Loci") + theme(axis.text.x = element_text(size=10, angle=90))
   
   myPlot <- function() {
-
+    if(input$gl == "All"){
+      fuma_plot_data <- fuma_snps_df
+    }else{
+      fuma_plot_data <- subset(fuma_snps_df, GenomicLocus == input$gl)
+    }
+    p2 <- ggplot(fuma_plot_data, aes(func, CADD, fill=func)) + geom_boxplot() + theme_classic() + theme(axis.text.x = element_text(angle=90)) + xlab("")
+    p3 <- ggplot(fuma_plot_data, aes(func, minChrState, fill=func)) + geom_boxplot() + theme_classic() + theme(axis.text.x = element_text(angle=90)) + xlab("")
+    p4 <- ggplot(fuma_plot_data, aes(func, negLogP, fill=func)) + geom_boxplot() + theme_classic() + theme(axis.text.x = element_text(angle=90)) + xlab("")
+    
     if(input$plotType == "CADD"){
       p2
     }
@@ -86,10 +99,26 @@ server <- function(input, output) {
       dev.off()
     }
   )
+  
   output$manhattan <- renderPlot({
     gg.manhattan(gwas, threshold=1e-6, hlight=NULL, col=mypalette, xlims=ranges$x, ylims=c(0,9), title="")
   })
   
+  output$circos <- renderPlot({
+    plotCircosByChr(paste0("chr", input$chromosome), dataList)
+  })
+  
+  output$downLoadCircos <- downloadHandler(
+    
+    filename = function() {
+      paste0("chr", input$chromosome, "_circos_", gsub("-", "", Sys.Date()), sep=".pdf")
+    },
+    content = function(file){
+      pdf(file)
+      plotCircosByChr(paste0("chr", input$chromosome), dataList)
+      dev.off()
+    }
+  )
   # When a double-click happens, check if there's a brush on the plot.
   # If so, zoom to the brush bounds; if not, reset the zoom.
   ranges <- reactiveValues(x = NULL, y = NULL)
