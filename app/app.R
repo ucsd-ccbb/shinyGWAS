@@ -5,9 +5,9 @@ library(htmlwidgets)
 library(shinyWidgets)
 library(data.table)
 library(dplyr)
-setwd("/Users/adammark/projects/shiny/shinyGWAS")
-source("app/CircosFunctions.R")
-source("app/data_prep.R")
+#setwd("/Users/adammark/projects/shiny/shinyGWAS")
+source("CircosFunctions.R")
+source("data_prep.R")
 
 # we need a local directory to write files - for instance, a vcf file representing a genomic
 # region of interest.  we then tell shiny about that directory, so that shiny's built-in http server
