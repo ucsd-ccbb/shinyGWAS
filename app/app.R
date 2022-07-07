@@ -5,7 +5,7 @@ library(htmlwidgets)
 library(shinyWidgets)
 library(data.table)
 library(dplyr)
-#setwd("/Users/adammark/projects/shiny/shinyGWAS")
+setwd("/Users/adammark/projects/shiny/shinyGWAS/app")
 source("CircosFunctions.R")
 source("data_prep.R")
 

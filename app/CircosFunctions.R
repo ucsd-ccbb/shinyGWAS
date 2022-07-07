@@ -159,7 +159,7 @@ plotCircosByChr <- function(chr, dataList) {
                                   }, cell.padding = c(0, 0, 0, 0), track.margin = c(0.01,0.1)
     )
     circos.genomicLabels(gns_all_filt_inp2[grep(paste0(chr, "_"), gns[,1]),], #nslabels.column = 4, 
-                         labels.column=4, cex=0.4, font=2, side = "outside", padding=0.03, track.margin=c(0, 0.005),
+                         labels.column=4, cex=0.4, font=8, side = "outside", padding=0.03, track.margin=c(0.01, 0.02),
                          col = gns[[6]], line_col = "grey70", connection_height = 0.02
     )
     
