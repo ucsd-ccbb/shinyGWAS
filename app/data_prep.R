@@ -19,7 +19,6 @@ fuma_eqtl <- fread("../FUMA_ASD_job58887/eqtl.txt", sep="\t")
 fuma_eqtl <- fuma_eqtl %>%
   filter(p<5E-8) %>%
   dplyr::select(c("uniqID", "p", "tissue", "symbol"))
-fuma_eqtl <- fuma_eqtl[!duplicated(fuma_eqtl$uniqID), ]
 fuma_eqtl <- merge(fuma_snps_df, fuma_eqtl, by="uniqID")
 #extract unique tissues for  eqtl tissue igv track
 eQTL_tissues <- unique(fuma_eqtl$tissue)
