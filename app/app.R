@@ -5,7 +5,7 @@ library(htmlwidgets)
 library(shinyWidgets)
 library(data.table)
 library(dplyr)
-setwd("/Users/adammark/projects/shiny/shinyGWAS/app")
+# setwd("/Users/adammark/projects/shiny/shinyGWAS/app")
 source("CircosFunctions.R")
 source("data_prep.R")
 
@@ -187,13 +187,13 @@ server <- function(input, output, session) {
     updateCheckboxInput(session, inputId = "selectEQTLtissueTrack", value = FALSE) #resets checkboxes
   }) 
  
-  # # manhattan plot & GWAS Catalog (this will load by default)
-  # observeEvent(input$igvReady, {
-  #   containerID <- input$igvReady
-  #   showGenomicRegion(session, id="igvShiny_tracks", "all")
-  #   loadGwasTrack(session, id="igvShiny_tracks", trackName="Manhattan Plot", tbl=new_gwas, deleteTracksOfSameName=TRUE)
-  #   # loadBedTrack(session, id="igvShiny_tracks", trackName="GWAS Catalog", tbl=gwasCatalog, color="green", deleteTracksOfSameName=TRUE)
-  # })
+  # manhattan plot & GWAS Catalog (this will load by default)
+  observeEvent(input$igvReady, {
+    containerID <- input$igvReady
+    showGenomicRegion(session, id="igvShiny_tracks", "all")
+    loadGwasTrack(session, id="igvShiny_tracks", trackName="Manhattan Plot", tbl=new_gwas, deleteTracksOfSameName=TRUE)
+    loadBedTrack(session, id="igvShiny_tracks", trackName="GWAS Catalog", tbl=gwasCatalog, color="green", deleteTracksOfSameName=TRUE)
+  })
 
   # Pop up info box
   observeEvent(input$trackClick, { #add popup window when a SNP is clicked
