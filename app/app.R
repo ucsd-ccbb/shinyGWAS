@@ -55,7 +55,8 @@ ui <- fluidPage(
                                                   lapply(1:length(eQTL_tissues), function(i) {
                                                     choices= eQTL_tissues[i] =  eQTL_tissues[i]})
                                 )),
-                          actionButton("addCAADScoreTrackButton", "Add CADD Score Track"),      
+                          actionButton("addCAADScoreTrackButton", "Add CADD Score Track"), 
+                          actionButton("addRDBScoreTrackButton", "Add RDB Score Track"), 
                           # remove tracks
                           actionButton("removeUserTracksButton", "Remove All Tracks"),
                           br(),
@@ -185,6 +186,13 @@ server <- function(input, output, session) {
     print("____Adding CADD Score Track ____")
     loadBedTrack(session, id="igvShiny_tracks", trackName="CADD Score", tbl=CADD_scores_df, color="red", deleteTracksOfSameName=FALSE);
   })
+  
+  
+  #RDB Catalog track
+  observeEvent(input$addRDBScoreTrackButton, {
+    print("____Adding RDB Score Track ____")
+    loadBedTrack(session, id="igvShiny_tracks", trackName="RDB Score", tbl=RDB_score, color="blue", deleteTracksOfSameName=FALSE);
+  })
 
   #Remove Tracks 
   observeEvent(input$removeUserTracksButton, {
@@ -218,7 +226,7 @@ server <- function(input, output, session) {
       x[11] <- "Chr"
     }
     #CADD score track
-    if (x[1]=="CADD"){
+    if (x[1]=="CADD" || x[1]=="RDB"){
       x[3]<-"rsID"
     }
     

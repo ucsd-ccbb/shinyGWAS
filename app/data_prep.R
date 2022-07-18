@@ -41,6 +41,17 @@ gwasCatalog$chr <- as.character(gwasCatalog$chr) #make sure this col are "charac
 gwasCatalog$start <- as.numeric(gwasCatalog$start) #numeric
 gwasCatalog$end <- as.numeric(gwasCatalog$end) #numeric
 
+#RBD scores
+RDB_score <- fuma_snps_df %>%
+  dplyr::select(c("chr", "pos", "RDB"))
+RDB_score$chr <- as.character(RDB_score$chr) #make sure this col are "character"
+RDB_score$start <- as.numeric(RDB_score$pos) #numeric
+RDB_score$end <- RDB_score$start + 1 #numeric
+# reorder the columns using select
+RDB_score <- RDB_score %>%
+  dplyr::select(c("chr", "start", "end", "RDB"))
+
+
 #CADD scores
 CADD_scores_df <- fuma_snps_df %>%
   dplyr::select(c("chr", "pos", "CADD"))
