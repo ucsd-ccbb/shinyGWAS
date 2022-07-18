@@ -55,7 +55,7 @@ ui <- fluidPage(
                                                   lapply(1:length(eQTL_tissues), function(i) {
                                                     choices= eQTL_tissues[i] =  eQTL_tissues[i]})
                                 )),
-                                
+                          actionButton("addCAADScoreTrackButton", "Add CADD Score Track"),      
                           # remove tracks
                           actionButton("removeUserTracksButton", "Remove All Tracks"),
                           br(),
@@ -162,7 +162,7 @@ server <- function(input, output, session) {
                   deleteTracksOfSameName=FALSE)
   })
   
-  #GWAS Catalog plot
+  #GWAS Catalog track
   observeEvent(input$addGWASCatalogTrackButton, {
     print("____Adding GWAS Catalog ____")
     loadBedTrack(session, id="igvShiny_tracks", trackName="GWAS Catalog", tbl=gwasCatalog, color="green", deleteTracksOfSameName=FALSE);
@@ -179,15 +179,21 @@ server <- function(input, output, session) {
     # updateCheckboxInput(session, inputId = "selectEQTLtissueTrack", value = FALSE) #resets checkboxes
     
   })
+  
+  #CADD Catalog track
+  observeEvent(input$addCAADScoreTrackButton, {
+    print("____Adding CADD Score Track ____")
+    loadBedTrack(session, id="igvShiny_tracks", trackName="CADD Score", tbl=CADD_scores_df, color="red", deleteTracksOfSameName=FALSE);
+  })
 
-  # Remove Tracks 
+  #Remove Tracks 
   observeEvent(input$removeUserTracksButton, {
     removeUserAddedTracks(session, id="igvShiny_tracks")
     removeUserAddedTracks(session, id="selectEQTLtissueTrack")
     updateCheckboxInput(session, inputId = "selectEQTLtissueTrack", value = FALSE) #resets checkboxes
   }) 
  
-  # manhattan plot & GWAS Catalog (this will load by default)
+  #manhattan plot & GWAS Catalog (this will load by default)
   observeEvent(input$igvReady, {
     containerID <- input$igvReady
     showGenomicRegion(session, id="igvShiny_tracks", "all")
@@ -206,9 +212,14 @@ server <- function(input, output, session) {
     if (length(x)>14 && x[15]=="GTEX"){ #add GTEX protal hyperlink
       x[16] <- paste0("<a href='",x[16],"'>", x[4]," URL</a>")
     }
+    #
     if (length(x)>8 &&x[9]=="PUBMEDID"){ #add hyperlink to pubmed
       x[10]<- paste0("<a href='https://pubmed.ncbi.nlm.nih.gov/",x[10],"'>", x[10],"</a>") 
       x[11] <- "Chr"
+    }
+    #CADD score track
+    if (x[1]=="CADD"){
+      x[3]<-"rsID"
     }
     
     attribute.name.positions <- grep("name", names(x))
@@ -231,7 +242,6 @@ server <- function(input, output, session) {
     html <- HTML(dialogContent())
     showModal(modalDialog(html,
                           size="m",
-                          title="SNP info",
                           easyClose=TRUE))
   })
   

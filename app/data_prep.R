@@ -32,13 +32,25 @@ fuma_gwas_cat <- fuma_gwas_cat %>%
 fuma_gwas_cat <- fuma_gwas_cat[!duplicated(fuma_gwas_cat$snp), ]
 fuma_gwas_cat <- merge(fuma_snps_df, fuma_gwas_cat, by.x="rsID", by.y="snp")
 
+### Tracks###
+#to create tracks make sure your dataframe has col1=chr, col2=start, col3=end. Otherwise igvShiny wont read it
 
 #GWAS Catalog used in Manhattan Tab 
 gwasCatalog <- fread("../data/GWAS_catalog_v1.0.2_signif_only_filtered_reordered_renamed.txt")
-#make sure col1 = chr, col2=start, and col3=end
 gwasCatalog$chr <- as.character(gwasCatalog$chr) #make sure this col are "character"
 gwasCatalog$start <- as.numeric(gwasCatalog$start) #numeric
 gwasCatalog$end <- as.numeric(gwasCatalog$end) #numeric
+
+#CADD scores
+CADD_scores_df <- fuma_snps_df %>%
+  dplyr::select(c("chr", "pos", "CADD"))
+CADD_scores_df$chr <- as.character(CADD_scores_df$chr) #make sure this col are "character"
+CADD_scores_df$start <- as.numeric(CADD_scores_df$pos) #numeric
+CADD_scores_df$end <- CADD_scores_df$start + 1 #numeric
+# reorder the columns using select
+CADD_scores_df <- CADD_scores_df %>%
+  dplyr::select(c("chr", "start", "end", "CADD"))
+
                        
 # Genes per locus
 fuma_genes <- fread("../FUMA_ASD_job58887/genes.txt", sep="\t")
