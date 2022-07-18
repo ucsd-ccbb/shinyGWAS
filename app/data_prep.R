@@ -17,8 +17,7 @@ fuma_snps_df$negLogP <- -log10(fuma_snps_df$gwasP)
 # eQTL
 fuma_eqtl <- fread("../FUMA_ASD_job58887/eqtl.txt", sep="\t")
 fuma_eqtl <- fuma_eqtl %>%
-  group_by(uniqID) %>%
-  filter(p==min(p)) %>%
+  filter(p<5E-8) %>%
   dplyr::select(c("uniqID", "p", "tissue", "symbol"))
 fuma_eqtl <- fuma_eqtl[!duplicated(fuma_eqtl$uniqID), ]
 fuma_eqtl <- merge(fuma_snps_df, fuma_eqtl, by="uniqID")
