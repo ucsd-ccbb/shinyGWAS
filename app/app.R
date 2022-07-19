@@ -22,50 +22,50 @@ ui <- fluidPage(
              tabPanel("Summary",
                       fluidRow(
                         column(width = 12,
-                          plotOutput("plot"))),
+                               plotOutput("plot"))),
                       fluidRow(
                         column(width = 4,
                                selectInput("plotType", "Plot Type",
                                            c("minChrState" = "minChrState",
                                              "CADD Score" = "CADD",
                                              "negLogP" = "negLogP"))
-                               ),
+                        ),
                         column(width = 4,
                                selectInput("gl", "Genomic Loci",
                                            c("All", sort(unique(fuma_snps_df$GenomicLocus))))),
                         column(width = 4,
                                downloadButton('downFile',"Save Plot")),
                         column(width = 12,
-                          plotOutput("plot2")))
+                               plotOutput("plot2")))
              ),
              tabPanel("Manhattan",
                       fluidRow(
                         #add Tracks tracks
-                          actionButton("addGWASTrackButton", "Add GWAS Track"),
-                          actionButton("addGWASCatalogTrackButton", "Add GWAS Catalog Track"),
-                          dropdownButton(
-                                inputId = "mydropdown",
-                                label="eQTL Tissues",
-                                icon=NULL,
-                                inline = TRUE,
-                                circle=FALSE,
-                                
-                                ##drop down menu
-                                selectInput("selectEQTLtissueTrack", "Add eQTL Tissue track",
-                                                  lapply(1:length(eQTL_tissues), function(i) {
-                                                    choices= eQTL_tissues[i] =  eQTL_tissues[i]})
-                                )),
-                          actionButton("addCAADScoreTrackButton", "Add CADD Score Track"), 
-                          actionButton("addRDBScoreTrackButton", "Add RDB Score Track"), 
-                          # remove tracks
-                          actionButton("removeUserTracksButton", "Remove All Tracks"),
-                          br(),
-                         
+                        actionButton("addGWASTrackButton", "Add GWAS Track"),
+                        actionButton("addGWASCatalogTrackButton", "Add GWAS Catalog Track"),
+                        dropdownButton(
+                          inputId = "mydropdown",
+                          label="eQTL Tissues",
+                          icon=NULL,
+                          inline = TRUE,
+                          circle=FALSE,
+                          
+                          ##drop down menu
+                          selectInput("selectEQTLtissueTrack", "Add eQTL Tissue track",
+                                      lapply(1:length(eQTL_tissues), function(i) {
+                                        choices= eQTL_tissues[i] =  eQTL_tissues[i]})
+                          )),
+                        actionButton("addCAADScoreTrackButton", "Add CADD Score Track"), 
+                        actionButton("addRDBScoreTrackButton", "Add RDB Score Track"), 
+                        # remove tracks
+                        actionButton("removeUserTracksButton", "Remove All Tracks"),
+                        br(),
+                        
                         #lads IGV tracks 
-                          igvShinyOutput('igvShiny_tracks'),
-                          br(),
-                          br()
-                       )
+                        igvShinyOutput('igvShiny_tracks'),
+                        br(),
+                        br()
+                      )
              ),
              tabPanel("Circos",
                       fluidRow(
@@ -76,11 +76,11 @@ ui <- fluidPage(
                                selectInput("chromosome", "Chromosome",
                                            c(seq(1,22), "X", "Y", "MT")),
                                downloadButton('downLoadCircos',"Save Plot")),
-                        )
+                      )
              )
-             )
-             )
- 
+  )
+)
+
 # Define server logic to read selected file ----
 server <- function(input, output, session) {
   #### ----------------Summary  Tab -----------------------------
@@ -166,49 +166,77 @@ server <- function(input, output, session) {
   #GWAS Catalog track
   observeEvent(input$addGWASCatalogTrackButton, {
     print("____Adding GWAS Catalog ____")
-    loadBedTrack(session, id="igvShiny_tracks", trackName="GWAS Catalog", tbl=gwasCatalog, color="green", deleteTracksOfSameName=FALSE);
-    })
-  
+    loadBedTrack(session, id="igvShiny_tracks", trackName="GWAS Catalog", tbl=gwasCatalog, color="random", deleteTracksOfSameName=FALSE);
+  })
+  head(fuma_eqtl)
   #eQTL tissue track
   observeEvent(input$selectEQTLtissueTrack,{
     print("____Adding eQTL Track ____")
     tissue <- input$selectEQTLtissueTrack
     tissue<-tissue[length(tissue)]
-    print(tissue)
     index <- which(fuma_eqtl$tissue==tissue)
-    loadGwasTrack(session, id="igvShiny_tracks", trackName=paste0("eQTL Tissue: ", tissue), tbl=fuma_eqtl[index, ], deleteTracksOfSameName=FALSE)
+    loadGwasTrack(session, 
+                  id="igvShiny_tracks", 
+                  trackName=paste0("eQTL Tissue: ", tissue), 
+                  tbl=fuma_eqtl[index, ],
+                  deleteTracksOfSameName=FALSE)
     # updateCheckboxInput(session, inputId = "selectEQTLtissueTrack", value = FALSE) #resets checkboxes
     
   })
   
-  #CADD Catalog track
+  #CADD Score track
   observeEvent(input$addCAADScoreTrackButton, {
     print("____Adding CADD Score Track ____")
-    loadBedTrack(session, id="igvShiny_tracks", trackName="CADD Score", tbl=CADD_scores_df, color="red", deleteTracksOfSameName=FALSE);
+    maxCADDval <- max(CADD_scores_df$CADD, na.rm=TRUE)
+    # loadBedTrack(session, id="igvShiny_tracks", trackName="CADD Score", tbl=CADD_scores_df, color="red", deleteTracksOfSameName=FALSE);
+    loadBedGraphTrack(session, 
+                      id="igvShiny_tracks",
+                      trackName="CADD Score", 
+                      tbl=CADD_scores_df, 
+                      color="random",  
+                      # max=maxCADDval,
+                      autoscale=TRUE, 
+                      trackHeight = 75,
+                      deleteTracksOfSameName=FALSE);
   })
   
   
   #RDB Catalog track
   observeEvent(input$addRDBScoreTrackButton, {
     print("____Adding RDB Score Track ____")
-    loadBedTrack(session, id="igvShiny_tracks", trackName="RDB Score", tbl=RDB_score, color="blue", deleteTracksOfSameName=FALSE);
+    loadBedTrack(session, 
+                 id="igvShiny_tracks",
+                 trackName="RDB Score", 
+                 tbl=RDB_score, 
+                 color="random", 
+                 deleteTracksOfSameName=FALSE);
   })
-
+  
   #Remove Tracks 
   observeEvent(input$removeUserTracksButton, {
     removeUserAddedTracks(session, id="igvShiny_tracks")
     removeUserAddedTracks(session, id="selectEQTLtissueTrack")
     updateCheckboxInput(session, inputId = "selectEQTLtissueTrack", value = FALSE) #resets checkboxes
   }) 
- 
+  
   #manhattan plot & GWAS Catalog (this will load by default)
   observeEvent(input$igvReady, {
     containerID <- input$igvReady
     showGenomicRegion(session, id="igvShiny_tracks", "all")
-    loadGwasTrack(session, id="igvShiny_tracks", trackName="Manhattan Plot", tbl=new_gwas, deleteTracksOfSameName=TRUE)
-    loadBedTrack(session, id="igvShiny_tracks", trackName="GWAS Catalog", tbl=gwasCatalog, color="green", deleteTracksOfSameName=TRUE)
-  })
-
+    loadGwasTrack(session, 
+                  id="igvShiny_tracks", 
+                  trackName="GWAS", 
+                  tbl=new_gwas, 
+                  ymin= -log10(max(new_gwas$P)),
+                  ymax= -log10(min(new_gwas$P)),
+                  deleteTracksOfSameName=TRUE)
+    loadBedTrack(session, 
+                 id="igvShiny_tracks", 
+                 trackName="GWAS Catalog",
+                 tbl=gwasCatalog,
+                 color="random", 
+                 deleteTracksOfSameName=TRUE);  })
+  
   # Pop up info box
   observeEvent(input$trackClick, { #add popup window when a SNP is clicked
     printf("--- igv-trackClick popup")
@@ -216,7 +244,7 @@ server <- function(input, output, session) {
     print(length(x))
     print(x)
     maxCols=length(x)/2
-
+    
     if (length(x)>14 && x[15]=="GTEX"){ #add GTEX protal hyperlink
       x[16] <- paste0("<a href='",x[16],"'>", x[4]," URL</a>")
     }
@@ -234,11 +262,11 @@ server <- function(input, output, session) {
     attribute.value.positions <- grep("value", names(x))
     attribute.names <- as.character(x)[attribute.name.positions][1:maxCols] #if different SNPs points overlap, one click will list several of them
     attribute.values <- as.character(x)[attribute.value.positions][1:maxCols]
-   
+    
     tbl <- data.frame(name=attribute.names,
                       value=attribute.values,
                       stringsAsFactors=FALSE)
-
+    
     dialogContent <- renderTable(tbl,
                                  striped=TRUE,
                                  hover=TRUE,
@@ -246,7 +274,7 @@ server <- function(input, output, session) {
                                  bordered = TRUE,
                                  width="100%",
                                  sanitize.text.function = function(x) x)
-
+    
     html <- HTML(dialogContent())
     showModal(modalDialog(html,
                           size="m",
