@@ -135,7 +135,7 @@ server <- function(input, output, session) {
       paste0(input$plotType, "_", gsub("-", "", Sys.Date()), sep=".png")
     },
     content = function(file){
-      png(file, width = 1000, height = 1000, units = "px", res = 300)
+      png(file, width = 2200, height = 1500, units = "px", res = 300)
       print(myPlot())
       dev.off()
     }
@@ -167,7 +167,7 @@ server <- function(input, output, session) {
       paste0("chr", input$chromosome, "_circos_", gsub("-", "", Sys.Date()), sep=".png")
     },
     content = function(file){
-      png(file, width = 1000, height = 1000, units = "px", res = 300)
+      png(file, width = 3000, height = 3000, units = "px", res = 300)
       plotCircosByChr(paste0("chr", input$chromosome), dataList)
       dev.off()
     }
