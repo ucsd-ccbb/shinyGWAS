@@ -20,7 +20,7 @@ rm(snps_all)
 
 # Load genes data
 gns_all <- as.data.frame(fread(file="genes.txt", sep="\t", header=TRUE))
-tmp_loci <- unlist(lapply(strsplit(gns_all[["GenomicLocus"]], ":"), function(x) x[[1]]))
+tmp_loci <- as.numeric(unlist(lapply(strsplit(as.character(gns_all[["GenomicLocus"]]), ":"), function(x) x[[1]])))
 gns_all_filt <- cbind.data.frame(gns_all[,c(3,4,5,2)], Loci=tmp_loci, ENS=as.character(gns_all[,1]))
 gns_all_filt[,1] <- paste0("chr", gns_all_filt[,1])
 gns_all_filt_inp <- gns_all_filt[,-5]
