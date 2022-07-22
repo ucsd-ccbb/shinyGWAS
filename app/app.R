@@ -34,7 +34,9 @@ ui <- fluidPage(
                                selectInput("gl", "Genomic Loci",
                                            c("All", sort(unique(fuma_snps_df$GenomicLocus))))),
                         column(width = 4,
-                               downloadButton('downFile',"Save Plot")),
+                               style = "margin-top: 25px;",
+                               downloadButton('downFilePdf',"Save .pdf"),
+                               downloadButton('downFilePng',"Save .png")),
                         column(width = 12,
                                plotOutput("plot2")))
              ),
@@ -75,7 +77,8 @@ ui <- fluidPage(
                         column(width = 4,
                                selectInput("chromosome", "Chromosome",
                                            c(seq(1,22), "X", "Y", "MT")),
-                               downloadButton('downLoadCircos',"Save Plot")),
+                               downloadButton('downLoadCircosPdf',"Save .pdf"),
+                               downloadButton('downLoadCircosPng',"Save .png"))
                       )
              )
   )
@@ -116,12 +119,23 @@ server <- function(input, output, session) {
     myPlot()
   })
   
-  output$downFile <- downloadHandler(
+  output$downFilePdf <- downloadHandler(
     filename = function() {
       paste0(input$plotType, "_", gsub("-", "", Sys.Date()), sep=".pdf")
     },
     content = function(file){
       pdf(file)
+      print(myPlot())
+      dev.off()
+    }
+  )
+  
+  output$downFilePng <- downloadHandler(
+    filename = function() {
+      paste0(input$plotType, "_", gsub("-", "", Sys.Date()), sep=".png")
+    },
+    content = function(file){
+      png(file, width = 1000, height = 1000, units = "px", res = 300)
       print(myPlot())
       dev.off()
     }
@@ -135,13 +149,25 @@ server <- function(input, output, session) {
     plotCircosByChr(paste0("chr", input$chromosome), dataList)
   })
   
-  output$downLoadCircos <- downloadHandler(
+  output$downLoadCircosPdf <- downloadHandler(
     
     filename = function() {
       paste0("chr", input$chromosome, "_circos_", gsub("-", "", Sys.Date()), sep=".pdf")
     },
     content = function(file){
       pdf(file)
+      plotCircosByChr(paste0("chr", input$chromosome), dataList)
+      dev.off()
+    }
+  )
+  
+  output$downLoadCircosPng <- downloadHandler(
+    
+    filename = function() {
+      paste0("chr", input$chromosome, "_circos_", gsub("-", "", Sys.Date()), sep=".png")
+    },
+    content = function(file){
+      png(file, width = 1000, height = 1000, units = "px", res = 300)
       plotCircosByChr(paste0("chr", input$chromosome), dataList)
       dev.off()
     }

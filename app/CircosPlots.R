@@ -1,5 +1,6 @@
 source("CircosFunctions.R")
-setwd("/Users/adammark/projects/shiny/shinyGWAS/FUMA_ASD_job58887/")
+# setwd("/Users/adammark/projects/shiny/shinyGWAS/FUMA_ASD_job58887/")
+setwd("/Users/artnasamran/Documents/shinyGWAS/FUMA_ASD_job58887/")
 
 l <- list.files()
 if(length(grep("GenomicRiskLoci.txt|snps.txt|genes.txt|ci.txt|eqtl.txt", l)) < 5) {
