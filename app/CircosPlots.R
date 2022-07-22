@@ -23,7 +23,7 @@ gns_all <- as.data.frame(fread(file="genes.txt", sep="\t", header=TRUE))
 tmp_loci <- as.numeric(unlist(lapply(strsplit(as.character(gns_all[["GenomicLocus"]]), ":"), function(x) x[[1]])))
 gns_all_filt <- cbind.data.frame(gns_all[,c(3,4,5,2)], Loci=tmp_loci, ENS=as.character(gns_all[,1]))
 gns_all_filt[,1] <- paste0("chr", gns_all_filt[,1])
-gns_all_filt_inp <- gns_all_filt[,-5]
+gns_all_filt_inp <- gns_all_filt[gns_all_filt$chr %in% loci_all_filt$chr,-5]
 gns_all_filt_inp$ENS <- as.character(gns_all_filt_inp$ENS)
 gns_all_filt_inp$V5 <- "id=0"
 gns_all_filt_inp$V5[which(gns_all$ciMap == "Yes")] <- "id=1"
