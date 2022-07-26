@@ -1,0 +1,1 @@
+uniqID	rsID	chr	pos	reg_region	type	tissue/cell
