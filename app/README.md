@@ -13,7 +13,7 @@ DO NOT remove these 2 files. These 2 files must be inside the app/ directory in 
 
 
 ## Deploy app to shinyIO:
-1. Open/edit ```app/shinyio_deploy.R``` script.
+1. Open and edit ```app/shinyio_deploy.R``` script.
 2. Change the *path* and the *appName* to in line 10 under ```deployApp()```
 
 
