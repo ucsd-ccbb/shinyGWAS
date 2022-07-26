@@ -133,6 +133,8 @@ plotCircosByChr <- function(chr, dataList) {
                                     xlim = get.cell.meta.data("xlim")
                                     for (i in incr) {
                                       circos.segments(x0=0, x1=max(snps[[chr]]$V3), y0=incr, y1=incr, lwd=0.6, lty="11", col="grey90")
+                                      circos.yaxis(at=i, labels.cex=0.4, lwd=0, tick.length=0, 
+                                                   labels.col=col_text, col="#FFFFFF")
                                     }
                                   },cell.padding = c(0, 0, 0, 0), track.margin = c(0.07,0.05)
     )
@@ -143,7 +145,7 @@ plotCircosByChr <- function(chr, dataList) {
                                     tmp.major.at = NULL
                                     tmp.major.at = seq(floor(tmp.xlim[1]/1000000)*1000000, tmp.xlim[2], by = 1000000)
                                     tmp.major.at = c(tmp.major.at, tmp.major.at[length(tmp.major.at)] + 1000000)
-                                    tmp.major.tick.labels = paste(round((tmp.major.at-tmp.xlim[1])/1000000, digits=2),
+                                    tmp.major.tick.labels = paste(round(tmp.major.at/1000000, digits=2),
                                                                   "Mb", sep = "")
                                     
                                     circos.genomicAxis(h="top",tickLabelsStartFromZero = FALSE, major.by = 1000000,
