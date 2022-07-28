@@ -15,7 +15,7 @@ rm(loci_all)
 
 # Load snps data
 snps_all <- as.data.frame(fread("snps.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE))
-snps_all_filt <- cbind.data.frame(snps_all[,c(3,4,4,8)], snps_all[["r2"]])
+snps_all_filt <- cbind.data.frame(snps_all[,c(3,4,4,8)], snps_all[["r2"]], rsID=snps_all[,2])
 snps_all_filt <- snps_all_filt[!is.na(snps_all_filt[,4]),]
 rm(snps_all)
 
@@ -135,7 +135,7 @@ gns_all_filt_inp2 <- gns_all_filt_inp2[!duplicated(gns_all_filt_inp2),-5]
 gns_all_filt_inp2 <- gns_all_filt_inp2[grep("_", gns_all_filt_inp2[,1]),]
 
 snps_all_split_inp <- lapply(1:length(snps_all_split), function(i) {
-  processSubChr(snps_all_split[[i]], chrFileList, chr=names(snps_all_split)[i])[,-c(4,5)]
+  processSubChr(snps_all_split[[i]], chrFileList, chr=names(snps_all_split)[i])[,-c(4,5)][,c(1:3,5,4,6)]
 })
 names(snps_all_split_inp) <- names(snps_all_split)
 

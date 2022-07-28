@@ -129,15 +129,27 @@ plotCircosByChr <- function(chr, dataList) {
     circos.genomicInitialize(chrFile[[chr]], plotType = NULL)
     circos.genomicTrackPlotRegion(snps[[chr]], bg.border=F,
                                   panel.fun = function(region, value, ...) {
-                                    circos.genomicPoints(region, value, cex=0.1, col=value[[2]], border=NA, bg.border=F, ...)
-                                    xlim = get.cell.meta.data("xlim")
+                                    circos.genomicPoints(region, value, cex=0.1, col=value[[3]], border=NA, bg.border=F, ...)
                                     for (i in incr) {
                                       circos.segments(x0=0, x1=max(snps[[chr]]$V3), y0=incr, y1=incr, lwd=0.6, lty="11", col="grey90")
                                       circos.yaxis(at=i, labels.cex=0.4, lwd=0, tick.length=0, 
                                                    labels.col=col_text, col="#FFFFFF")
                                     }
+                                    tmp.xlim <- get.cell.meta.data("xlim")[1]
+                                    tmp.xlim.adj <- 0.001 * tmp.xlim
+                                    circos.text(tmp.xlim+tmp.xlim.adj, get.cell.meta.data("ycenter"), 
+                                                labels = "-log(gwasP)", col="grey60", cex=0.6,
+                                                facing = "clockwise")
                                   },cell.padding = c(0, 0, 0, 0), track.margin = c(0.07,0.05)
     )
+    for (i in unique(snps[[chr]][,1])) {
+      tmp.snps <- snps[[chr]][snps[[chr]][,1] %in% i,]
+      max.snp <- tmp.snps[as.numeric(tmp.snps[,4]) == max(as.numeric(tmp.snps[,4])),,drop=FALSE]
+      max.snp[,4] <- as.numeric(max.snp[,4])
+      circos.genomicText(region=max.snp[,1:3,drop=FALSE], value=max.snp[,-c(1:3),drop=FALSE], cex=0.6, 
+                         labels.column=2, numeric.column=1, track.index=1, sector.index=max.snp[1,1],
+                         col="grey60", adj=c(0.5,-0.3))
+    }
     circos.genomicTrackPlotRegion(chrFile[[chr]], ylim = c(0, 1), bg.border = NA, track.height = 0.05,
                                   panel.fun = function(region, value, ...) {
                                     tmp.xlim = get.cell.meta.data("xlim", get.current.sector.index(), 
