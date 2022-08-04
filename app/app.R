@@ -6,8 +6,8 @@ library(shinyWidgets)
 library(data.table)
 library(dplyr)
 # setwd("/Users/adammark/projects/shiny/shinyGWAS/app")
-source("CircosFunctions.R")
-source("data_prep.R")
+source("scripts/CircosFunctions.R")
+source("scripts/data_prep.R")
 
 # we need a local directory to write files - for instance, a vcf file representing a genomic
 # region of interest.  we then tell shiny about that directory, so that shiny's built-in http server
@@ -80,7 +80,10 @@ ui <- fluidPage(
                                downloadButton('downLoadCircosPdf',"Save .pdf"),
                                downloadButton('downLoadCircosPng',"Save .png"))
                       )
-             )
+             ),
+             tabPanel("Session Info",
+                      verbatimTextOutput("sessionInfo")
+                      )
   )
 )
 
@@ -332,6 +335,11 @@ server <- function(input, output, session) {
   
   output$table1 <- DT::renderDataTable({
     DT::datatable(fuma_snps_df)
+  })
+  
+  output$sessionInfo <- renderPrint({
+    #capture.output(sessionInfo())
+    sessionInfo()
   })
   
 }
