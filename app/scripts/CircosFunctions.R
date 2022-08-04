@@ -130,25 +130,28 @@ plotCircosByChr <- function(chr, dataList) {
     circos.genomicTrackPlotRegion(snps[[chr]], bg.border=F,
                                   panel.fun = function(region, value, ...) {
                                     circos.genomicPoints(region, value, cex=0.1, col=value[[3]], border=NA, bg.border=F, ...)
-                                    for (i in incr) {
-                                      circos.segments(x0=0, x1=max(snps[[chr]]$V3), y0=incr, y1=incr, lwd=0.6, lty="11", col="grey90")
-                                      circos.yaxis(at=i, labels.cex=0.4, lwd=0, tick.length=0, 
-                                                   labels.col=col_text, col="#FFFFFF")
-                                    }
                                     tmp.xlim <- get.cell.meta.data("xlim")[1]
                                     tmp.xlim.adj <- 0.001 * tmp.xlim
                                     circos.text(tmp.xlim+tmp.xlim.adj, get.cell.meta.data("ycenter"), 
-                                                labels = "-log(gwasP)", col="grey60", cex=0.6,
+                                                labels = "-log(gwasP)", col="grey40", cex=0.7,
                                                 facing = "clockwise")
+                                    for (i in incr) {
+                                      circos.yaxis(at=i, labels.cex=0.5, lwd=0, tick.length=0, 
+                                                   labels.col=col_text, col="grey40")
+                                      circos.segments(x0=0, x1=max(snps[[chr]]$V3), y0=incr, y1=incr, 
+                                                      lwd=0.6, lty="11", col="grey90")
+                                    }
+
+                                    
                                   },cell.padding = c(0, 0, 0, 0), track.margin = c(0.07,0.05)
     )
     for (i in unique(snps[[chr]][,1])) {
       tmp.snps <- snps[[chr]][snps[[chr]][,1] %in% i,]
       max.snp <- tmp.snps[as.numeric(tmp.snps[,4]) == max(as.numeric(tmp.snps[,4])),,drop=FALSE]
       max.snp[,4] <- as.numeric(max.snp[,4])
-      circos.genomicText(region=max.snp[,1:3,drop=FALSE], value=max.snp[,-c(1:3),drop=FALSE], cex=0.6, 
+      circos.genomicText(region=max.snp[,1:3,drop=FALSE], value=max.snp[,-c(1:3),drop=FALSE], cex=0.7, 
                          labels.column=2, numeric.column=1, track.index=1, sector.index=max.snp[1,1],
-                         col="grey60", adj=c(0.5,-0.3))
+                         col="grey40", adj=c(0.5,-0.3))
     }
     circos.genomicTrackPlotRegion(chrFile[[chr]], ylim = c(0, 1), bg.border = NA, track.height = 0.05,
                                   panel.fun = function(region, value, ...) {
@@ -162,7 +165,7 @@ plotCircosByChr <- function(chr, dataList) {
                                     
                                     circos.genomicAxis(h="top",tickLabelsStartFromZero = FALSE, major.by = 1000000,
                                                        major.at=tmp.major.at, labels=tmp.major.tick.labels,
-                                                       track.index = get.current.track.index(), labels.cex=0.4,
+                                                       track.index = get.current.track.index(), labels.cex=0.5,
                                                        labels.facing="clockwise", col=col_text, labels.col=col_text)
                                     
                                     col = value[[1]]
@@ -173,7 +176,7 @@ plotCircosByChr <- function(chr, dataList) {
                                   }, cell.padding = c(0, 0, 0, 0), track.margin = c(0.01,0.1)
     )
     circos.genomicLabels(gns_all_filt_inp2[grep(paste0(chr, "_"), gns[,1]),], #nslabels.column = 4, 
-                         labels.column=4, cex=0.4, font=8, side = "outside", padding=0.03, track.margin=c(0.01, 0.02),
+                         labels.column=4, cex=0.55, font=8, side = "outside", padding=0.03, track.margin=c(0.01, 0.02),
                          col = gns[[6]], line_col = "grey70", connection_height = 0.02
     )
     
@@ -188,11 +191,11 @@ plotCircosByChr <- function(chr, dataList) {
     )
     if (!is.null(ci_all_split_inp[[chr]])) {
       circos.genomicLink(region1 = ci[[chr]][,1:3], ci[[chr]][,4:6], 
-                         col=ci[[chr]][,7], lwd=0.01,border=NA)
+                         col=ci[[chr]][,7], lwd=0.01,border=NA, h.ratio=0.5)
     }
     if (!is.null(eqtl_all_split_inp[[chr]])) {
       circos.genomicLink(region1 = eqtl[[chr]][,1:3], eqtl[[chr]][,4:6], 
-                         col=eqtl[[chr]][,7], lwd=0.01,border=NA, h.ratio=0.8)
+                         col=eqtl[[chr]][,7], lwd=0.01,border=NA, h.ratio=0.5)
     }
     #dev.off()
   }}
