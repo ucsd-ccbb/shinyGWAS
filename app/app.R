@@ -8,7 +8,7 @@ library(dplyr)
 # setwd("/Users/adammark/projects/shiny/shinyGWAS/app")
 source("scripts/CircosFunctions.R")
 source("scripts/data_prep.R")
-
+source("scripts/CircosPlots.R")
 # we need a local directory to write files - for instance, a vcf file representing a genomic
 # region of interest.  we then tell shiny about that directory, so that shiny's built-in http server
 # can serve up files we write there, ultimately consumed by igv.js
@@ -216,12 +216,12 @@ server <- function(input, output, session) {
   #CADD Score track
   observeEvent(input$addCAADScoreTrackButton, {
     print("____Adding CADD Score Track ____")
-    maxCADDval <- max(CADD_scores_df$CADD, na.rm=TRUE)
+    maxCADDval <- max(CADD_scores$CADD, na.rm=TRUE)
     # loadBedTrack(session, id="igvShiny_tracks", trackName="CADD Score", tbl=CADD_scores_df, color="red", deleteTracksOfSameName=FALSE);
     loadBedGraphTrack(session, 
                       id="igvShiny_tracks",
                       trackName="CADD Score", 
-                      tbl=CADD_scores_df, 
+                      tbl=CADD_scores, 
                       color="random",  
                       # max=maxCADDval,
                       autoscale=TRUE, 
