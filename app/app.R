@@ -9,6 +9,7 @@ library(dplyr)
 source("scripts/data_prep.R")
 source("scripts/CircosFunctions.R")
 source("scripts/CircosPlots.R")
+source("scripts/GWASSummaryBarPlot.R")
 # we need a local directory to write files - for instance, a vcf file representing a genomic
 # region of interest.  we then tell shiny about that directory, so that shiny's built-in http server
 # can serve up files we write there, ultimately consumed by igv.js
@@ -23,6 +24,12 @@ ui <- fluidPage(
                       fluidRow(
                         column(width = 12,
                                plotOutput("plot"))),
+                      #GWAS Summary bar plot
+                      hr(),
+                      fluidRow(
+                        column(width = 12,
+                               plotOutput("GwasCatSummBarPlot", width = "100%", height = "400px"))),
+                      hr(),
                       fluidRow(
                         column(width = 4,
                                selectInput("plotType", "Plot Type",
@@ -175,6 +182,14 @@ server <- function(input, output, session) {
       dev.off()
     }
   )
+  
+  #GWAS Catalag Summary Bar plot
+  output$GwasCatSummBarPlot <- renderPlot({
+    gwasBarplot
+  })
+  
+  
+  
   
   
   #### ----------------Manhattan Tab -----------------------------
