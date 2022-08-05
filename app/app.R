@@ -6,8 +6,8 @@ library(shinyWidgets)
 library(data.table)
 library(dplyr)
 # setwd("/Users/adammark/projects/shiny/shinyGWAS/app")
-source("scripts/CircosFunctions.R")
 source("scripts/data_prep.R")
+source("scripts/CircosFunctions.R")
 source("scripts/CircosPlots.R")
 # we need a local directory to write files - for instance, a vcf file representing a genomic
 # region of interest.  we then tell shiny about that directory, so that shiny's built-in http server
@@ -233,12 +233,16 @@ server <- function(input, output, session) {
   #RDB Catalog track
   observeEvent(input$addRDBScoreTrackButton, {
     print("____Adding RDB Score Track ____")
-    loadBedTrack(session, 
-                 id="igvShiny_tracks",
-                 trackName="RDB Score", 
-                 tbl=RDB_score, 
-                 color="random", 
-                 deleteTracksOfSameName=FALSE);
+    # loadBedTrack(session, id="igvShiny_tracks",trackName="RDB Score", tbl=RDB_score, color="random", deleteTracksOfSameName=FALSE);
+    loadBedGraphTrack(session, 
+                      id="igvShiny_tracks",
+                      trackName="RegulomeDB score", 
+                      tbl=RDB_score, 
+                      color="random",  
+                      # max=maxCADDval,
+                      autoscale=TRUE, 
+                      trackHeight = 75,
+                      deleteTracksOfSameName=FALSE);
   })
   
   #Remove Tracks 
@@ -273,29 +277,29 @@ server <- function(input, output, session) {
     print(length(x))
     print(x)
     maxCols=length(x)/2
-    
+
     if (length(x)>14 && x[15]=="GTEX"){ #add GTEX protal hyperlink
       x[16] <- paste0("<a href='",x[16],"'>", x[4]," URL</a>")
     }
     #
     if (length(x)>8 &&x[9]=="PUBMEDID"){ #add hyperlink to pubmed
-      x[10]<- paste0("<a href='https://pubmed.ncbi.nlm.nih.gov/",x[10],"'>", x[10],"</a>") 
+      x[10]<- paste0("<a href='https://pubmed.ncbi.nlm.nih.gov/",x[10],"'>", x[10],"</a>")
       x[11] <- "Chr"
     }
     #CADD score track
     if (x[1]=="CADD" || x[1]=="RDB"){
       x[3]<-"rsID"
     }
-    
+
     attribute.name.positions <- grep("name", names(x))
     attribute.value.positions <- grep("value", names(x))
     attribute.names <- as.character(x)[attribute.name.positions][1:maxCols] #if different SNPs points overlap, one click will list several of them
     attribute.values <- as.character(x)[attribute.value.positions][1:maxCols]
-    
+
     tbl <- data.frame(name=attribute.names,
                       value=attribute.values,
                       stringsAsFactors=FALSE)
-    
+
     dialogContent <- renderTable(tbl,
                                  striped=TRUE,
                                  hover=TRUE,
@@ -303,12 +307,13 @@ server <- function(input, output, session) {
                                  bordered = TRUE,
                                  width="100%",
                                  sanitize.text.function = function(x) x)
-    
+
     html <- HTML(dialogContent())
     showModal(modalDialog(html,
                           size="m",
                           easyClose=TRUE))
   })
+
   
   # render IGV 
   output$igvShiny_tracks <- renderIgvShiny({

@@ -199,3 +199,6 @@ plotCircosByChr <- function(chr, dataList) {
     }
     #dev.off()
   }}
+
+
+print("--- CircosFunctions.R loaded ---")
