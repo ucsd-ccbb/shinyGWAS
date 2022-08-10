@@ -125,13 +125,13 @@ plotCircosByChr <- function(chr, dataList) {
     col_text <- "grey40"
     circos.clear()
     #pdf(paste0("CircosPlot_", chr), width=5, height=5)
-    circos.par("start.degree" = 90)
+    circos.par("start.degree" = 90, circle.margin = c(0.001, 0.001, 0.1, 0.001))
     circos.genomicInitialize(chrFile[[chr]], plotType = NULL)
     circos.genomicTrackPlotRegion(snps[[chr]], bg.border=F,
                                   panel.fun = function(region, value, ...) {
                                     circos.genomicPoints(region, value, cex=0.1, col=value[[3]], border=NA, bg.border=F, ...)
                                     tmp.xlim <- get.cell.meta.data("xlim")[1]
-                                    tmp.xlim.adj <- 0.001 * tmp.xlim
+                                    tmp.xlim.adj <- 0.0005 * tmp.xlim
                                     circos.text(tmp.xlim+tmp.xlim.adj, get.cell.meta.data("ycenter"), 
                                                 labels = "-log(gwasP)", col="grey40", cex=0.7,
                                                 facing = "clockwise")
@@ -198,6 +198,24 @@ plotCircosByChr <- function(chr, dataList) {
                          col=eqtl[[chr]][,7], lwd=0.01,border=NA, h.ratio=0.5)
     }
     #dev.off()
+    snp_legend <- data.frame(snp_labels=c("r sq. > 0.8", "0.6 < r sq. < 0.8", "0.4 < r sq. < 0.6", "0.2 < r sq. < 0.4"),
+                             snp_cols=c("red","dark orange","forest green", "blue"))
+    w_snp_cols <- which(snp_legend$snp_cols %in% as.character(snps[[chr]][,6]))  
+    lgd_points = Legend(at = snp_legend$snp_labels[w_snp_cols],
+                        type = "points", legend_gp = gpar(col=snp_legend$snp_cols[w_snp_cols]), 
+                        title_position = "topleft", title = "SNPs")
+    lgd_lines = Legend(at = c("Chrom Region", "Genomic Risk Loci"), type = "lines", 
+                       legend_gp = gpar(col = c("#59bfff","#1520A6"), lwd = 7), title_position = "topleft", 
+                       title = "Genomic Risk Loci", column_gap = unit(1, "cm"))
+    lgd_lines2 = Legend(at = c("Chrom Region", "Genomic Risk Loci"), type = "lines", 
+                        legend_gp = gpar(col = c("#cde7f7","#1520A6"), lwd = 7), title_position = "topleft", 
+                        title = "Genes", column_gap = unit(1, "cm"))
+    lgd_lines3 = Legend(at = c("Chromatin Int. Links", "eqtl links"), type = "lines",
+                        legend_gp = gpar(col = c("dark orange", "forest green"), lwd=2), 
+                        title_position="topleft", title = "Links")
+    lgd_list_horizontal2 = packLegend(lgd_points, lgd_lines, lgd_lines2, lgd_lines3, direction = "horizontal", 
+                                      column_gap = unit(1, "cm"))
+    draw(lgd_list_horizontal2, x = unit(1, "cm"), y = unit(1, "cm"), just = c("left", "bottom"))
   }}
 
 
