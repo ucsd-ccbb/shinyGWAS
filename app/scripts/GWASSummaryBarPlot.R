@@ -1,4 +1,6 @@
 library(dplyr)
+library(tidyr)
+
 
 #parse data
 source("scripts/Functions.R")
@@ -45,6 +47,8 @@ for (focal_loc in unique(FUMA_SNPs_df$GenomicLocus)){ # loop over genomic loci
     colnames(focal_eqtl)
     #sort by pval
     focal_eqtl <- focal_eqtl[order(focal_eqtl$p),]
+    # focal_eqtl <- focal_eqtl[!duplicated(focal_eqtl$snp),]
+    
     #reshape focal df
     focal_df_intIDs <- focal_df[rownames(focal_df) %in% intersecting_ids, ]  # Extract rows from data
     #add columns to focal df
@@ -57,6 +61,8 @@ for (focal_loc in unique(FUMA_SNPs_df$GenomicLocus)){ # loop over genomic loci
     focal_df_intIDs$top_gwas_cat_context <-NA
     #add NAs to the remainder of that focal df
     focal_df_noIntIDs <- focal_df[!rownames(focal_df) %in% intersecting_ids, ]  # Extract rows from data
+    # focal_df_noIntIDs <- focal_df_noIntIDs[!duplicated(focal_df_noIntIDs$snp),]
+    
     focal_df_noIntIDs$top_eQTL_pval<- NA
     focal_df_noIntIDs$top_eQTL_tissue<-NA
     focal_df_noIntIDs$top_eQTL_gene<-NA   
@@ -120,25 +126,63 @@ for (focal_loc in unique(FUMA_SNPs_df$GenomicLocus)){ # loop over genomic loci
   FUMA_annot_df <- rbind(FUMA_annot_df, focal_df)
   
 }
-
-
-#remove NAs
-# FUMA_annot_df <- na.omit(FUMA_annot_df) 
-
-
-
-#create bar plot
+#PLOT
 FUMA_annot_plot <- FUMA_annot_df %>%
   dplyr::select(c(GenomicLocus, top_gwas_cat_trait))
 test <- na.omit(FUMA_annot_plot)
 
-#filter
-gwasBarplot <- ggplot(test, aes(factor(GenomicLocus), fill=top_gwas_cat_trait)) + 
-  geom_bar(position="stack") + 
-  theme_classic() + 
-  theme(legend.position=c(0.5,1)) +
+#plot
+gwasBarplot <- ggplot(test, aes(x=factor(top_gwas_cat_trait), fill=factor(GenomicLocus))) +
+  geom_bar(position="stack") +
+  theme_classic() +
+  theme(legend.position="bottom") +
   theme(legend.text = element_text( size = 7))+
-  ylim(0, 90) +
-  theme(axis.text.x = element_text(size=10, angle=90))
+  # ylim(0, 20) +
+  xlab("Top GWAS Catalog Trait") +
+  labs(fill = "Genomic Locus") +
+  scale_x_discrete(guide = guide_axis(angle = 90)) 
+  
+  # theme(axis.text.x = element_text(size=10, angle=90))
+# gwasBarplot
+
+#### plot the other way 
+#create bar plot
+# FUMA_annot_plot <- FUMA_annot_df %>%
+#   dplyr::select(c(GenomicLocus, top_gwas_cat_trait))
+# test <- na.omit(FUMA_annot_plot)
+# test$values <-1
+# 
+# test<- test %>%
+#   group_by(top_gwas_cat_trait, GenomicLocus) %>%
+#   # filter(Capture != "") %>%  # filter out captured ones (handling)
+#   summarise(Count = n())   #get the count for each fish type (long format)
+#   #spread(top_gwas_cat_trait, Count) #%>%# Use the spread() function from tidyr package to convert the data from long to wide format
+#   # dplyr::select(test , -c(GenomicLocus))
+# 
+# test <- as.data.frame(t(test))
+# colnames(test) <- test[1,] 
+# test <- test[-1,]
+# 
+# 
+# test[] <- lapply(test, function(x) as.numeric(as.character(x)))
+# sapply(test, class)
+# 
+# 
+# test <- test[rowSums(test[], na.rm=TRUE)>1,]
+# 
+# traits <- rownames(test)
+# test$top_gwas_cat_trait <- traits
+# locuses <- colnames(test)
+# 
+# 
+# gwasBarplot <- ggplot(test, aes(factor(locuses), fill=c(top_gwas_cat_trait))) +
+#   geom_bar(position="stack") +
+#   theme_classic() +
+#   theme(legend.position=c(0.5,1)) +
+#   theme(legend.text = element_text( size = 7))+
+#   theme(axis.text.x = element_text(size=10, angle=450))
+# 
+# gwasBarplot
+
 
 
