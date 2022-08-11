@@ -2,6 +2,17 @@
 
 #library(IRdisplay)
 ## Processing functions
+
+
+library(circlize)
+library(RCircos)
+# library(plyr)
+library(reshape2)
+library(dplyr)
+library(data.table)
+## New library load
+library(ComplexHeatmap)
+options(stringsAsFactors=FALSE)
 generateChromosomeFiles <- function(c, loci, ci, snp, gene) {
   loci2 <- cbind.data.frame(loci, loci[,5:6])
   if(!is.null(ci)) {
