@@ -66,7 +66,7 @@ ui <- fluidPage(
                                         choices= eQTL_tissues[i] =  eQTL_tissues[i]})
                           )),
                         actionButton("addCAADScoreTrackButton", "Add CADD Score Track"), 
-                        actionButton("addRDBScoreTrackButton", "Add RDB Score Track"), 
+                        # actionButton("addRDBScoreTrackButton", "Add RDB Score Track"), 
                         # remove tracks
                         actionButton("removeUserTracksButton", "Remove All Tracks"),
                         br(),
@@ -219,7 +219,7 @@ server <- function(input, output, session) {
     print("____Adding GWAS Catalog ____")
     loadBedTrack(session, id="igvShiny_tracks", trackName="GWAS Catalog", tbl=gwasCatalog, color="random", deleteTracksOfSameName=FALSE);
   })
-  head(fuma_eqtl)
+ 
   #eQTL tissue track
   observeEvent(input$selectEQTLtissueTrack,{
     print("____Adding eQTL Track ____")
@@ -240,22 +240,22 @@ server <- function(input, output, session) {
     print("____Adding CADD Score Track ____")
     maxCADDval <- max(CADD_scores$CADD, na.rm=TRUE)
     # loadBedTrack(session, id="igvShiny_tracks", trackName="CADD Score", tbl=CADD_scores_df, color="red", deleteTracksOfSameName=FALSE);
-    loadBedGraphTrack(session, 
+    loadBedGraphTrack(session,
                       id="igvShiny_tracks",
-                      trackName="CADD Score", 
-                      tbl=CADD_scores, 
-                      color="random",  
+                      trackName="CADD Score",
+                      tbl=CADD_scores,
+                      color="random",
                       # max=maxCADDval,
-                      autoscale=TRUE, 
+                      autoscale=TRUE,
                       trackHeight = 75,
                       deleteTracksOfSameName=FALSE);
   })
   
   
   #RDB Catalog track
-  observeEvent(input$addRDBScoreTrackButton, {
-    print("____Adding RDB Score Track ____")
-    loadBedTrack(session, id="igvShiny_tracks",trackName="RDB Score", tbl=RDB_score, color="blue", deleteTracksOfSameName=FALSE);
+  # observeEvent(input$addRDBScoreTrackButton, {
+  #   print("____Adding RDB Score Track ____")
+  #   loadBedTrack(session, id="igvShiny_tracks",trackName="RDB Score", tbl=RDB_score, color="blue", deleteTracksOfSameName=FALSE);
     # loadBedGraphTrack(session, 
     #                   id="igvShiny_tracks",
     #                   trackName="RegulomeDB score", 
@@ -265,7 +265,7 @@ server <- function(input, output, session) {
     #                   autoscale=TRUE, 
     #                   trackHeight = 75,
     #                   deleteTracksOfSameName=FALSE);
-  })
+  # })
   
   #Remove Tracks 
   observeEvent(input$removeUserTracksButton, {
