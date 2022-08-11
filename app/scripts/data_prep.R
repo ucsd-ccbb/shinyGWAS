@@ -6,6 +6,16 @@ library(VariantAnnotation)
 library(circlize)
 library(RCircos)
 library(dplyr)
+
+# library(IRdisplay)
+
+# library(plyr)
+
+library(reshape2)
+
+## New library load
+library(ComplexHeatmap)
+
 options(stringsAsFactors=FALSE)
 
 getwd()
