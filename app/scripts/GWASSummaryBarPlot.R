@@ -9,9 +9,9 @@ getwd()
 # inputdir = "app/data/FUMA_Results"
 inputdir = FUMA_Dir
 ##snps
-gwasBP_FUMA_SNPs_df <- as.data.frame(loadInputFile(inputdir, "snps.txt")) %>%
-  dplyr::select(c('uniqID','chr','pos','rsID','non_effect_allele','effect_allele','MAF','gwasP','GenomicLocus','nearestGene',
-                  'dist','func','CADD','RDB','minChrState','commonChrState')) 
+gwasBP_FUMA_SNPs_df <- as.data.frame(loadInputFile(inputdir, "snps.txt"))# %>%
+#   dplyr::select(c('uniqID','chr','pos','rsID','non_effect_allele','effect_allele','MAF','gwasP','GenomicLocus','nearestGene',
+#                   'dist','func','CADD','RDB','minChrState','commonChrState')) 
 row.names(gwasBP_FUMA_SNPs_df) <- gwasBP_FUMA_SNPs_df$rsID
 gwasBP_FUMA_SNPs_df$negLogP <- -log10(gwasBP_FUMA_SNPs_df$gwasP)
 
@@ -75,7 +75,7 @@ for (focal_loc in unique(gwasBP_FUMA_SNPs_df$GenomicLocus)){ # loop over genomic
     }else(
       focal_df <- focal_df_intIDs #merge
     )
-  }else{
+  }else{ #if there are NO intersecting eQTLS 
     focal_df$top_eQTL_pval<- NA
     focal_df$top_eQTL_tissue<-NA
     focal_df$top_eQTL_gene<-NA
@@ -120,16 +120,16 @@ for (focal_loc in unique(gwasBP_FUMA_SNPs_df$GenomicLocus)){ # loop over genomic
     
     focal_df <- rbind(focal_df, focal_df_gwas)
     
-  }else{
-    focal_df_intIDs_GWAS$top_eQTL_pval<- NA
-    focal_df_intIDs_GWAS$top_eQTL_tissue<-NA
-    focal_df_intIDs_GWAS$top_eQTL_gene<-NA
-    focal_df_intIDs_GWAS$top_gwas_cat_pval<- NA
-    focal_df_intIDs_GWAS$top_gwas_cat_trait<-NA
-    focal_df_intIDs_GWAS$top_gwas_cat_PMID<-NA
-    focal_df_intIDs_GWAS$top_gwas_cat_context <-NA
-    
-  }
+  }#else{
+  #   # focal_df_intIDs_GWAS$top_eQTL_pval<- NA
+  #   # focal_df_intIDs_GWAS$top_eQTL_tissue<-NA
+  #   # focal_df_intIDs_GWAS$top_eQTL_gene<-NA
+  #   # focal_df_intIDs_GWAS$top_gwas_cat_pval<- NA
+  #   # focal_df_intIDs_GWAS$top_gwas_cat_trait<-NA
+  #   # focal_df_intIDs_GWAS$top_gwas_cat_PMID<-NA
+  #   # focal_df_intIDs_GWAS$top_gwas_cat_context <-NA
+  #   
+  # }
   FUMA_annot_df <- rbind(FUMA_annot_df, focal_df)
   
 }
