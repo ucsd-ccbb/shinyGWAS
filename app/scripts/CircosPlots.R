@@ -160,7 +160,10 @@ names(eqtl_all_split_inp) <- names(eqtl_all_split)
 
 ## Generate circos for each chromosome
 
-dataList <- list(gns=gns_all_filt_inp2, snps=snps_all_split_inp, chrFileList=chrFileList, ci=ci_all_split_inp, eqtl=eqtl_all_split_inp)
+w_dataList <- which(unlist(lapply(snps_all_split_inp, nrow)) < 2)
+dataList <- list(gns=gns_all_filt_inp2, 
+                 snps=snps_all_split_inp[-w_dataList], chrFileList=chrFileList[-w_dataList], 
+                 ci=ci_all_split_inp[-w_dataList], eqtl=eqtl_all_split_inp[-w_dataList])
 
 # for(chr in names(snps_all_split_inp)) {
 #   plotCircosByChr(chr, dataList) 
