@@ -138,8 +138,12 @@ FUMA_annot_plot <- FUMA_annot_df %>%
   dplyr::select(c(GenomicLocus, top_gwas_cat_trait))
 test <- na.omit(FUMA_annot_plot)
 
+factor(test$top_gwas_cat_trait)
+
 #plot
-gwasBarplot <- ggplot(test, aes(x=factor(top_gwas_cat_trait), fill=factor(GenomicLocus))) +
+gwasBarplot <- ggplot(test, 
+  aes(x=reorder(top_gwas_cat_trait,top_gwas_cat_trait,
+                function(x)-length(x)),  fill=factor(GenomicLocus))) +
   geom_bar(position="stack") +
   theme_classic() +
   theme(legend.position=c(0.75,0.78)) +
@@ -152,7 +156,7 @@ gwasBarplot <- ggplot(test, aes(x=factor(top_gwas_cat_trait), fill=factor(Genomi
   scale_x_discrete(guide = guide_axis(angle = 90)) 
   
   # theme(axis.text.x = element_text(size=10, angle=90))
-# gwasBarplot
+gwasBarplot
 
 #### plot the other way 
 #create bar plot
