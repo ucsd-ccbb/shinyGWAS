@@ -4,7 +4,7 @@ library(igvShiny)
 library(htmlwidgets)
 library(shinyWidgets)
 library(data.table)
-library(dplyr)
+# library(dplyr)
 # setwd("/Users/adammark/projects/shiny/shinyGWAS/app")
 source("scripts/data_prep.R")
 source("scripts/CircosFunctions.R")
@@ -28,7 +28,8 @@ ui <- fluidPage(
                       hr(),
                       fluidRow(
                         column(width = 12,
-                               plotOutput("GwasCatSummBarPlot", width = "100%", height = "400px"))),
+                               height="700px",
+                               plotOutput("GwasCatSummBarPlot", height =700))),
                       hr(),
                       fluidRow(
                         column(width = 4,
@@ -79,11 +80,14 @@ ui <- fluidPage(
              tabPanel("Circos",
                       fluidRow(
                         column(width = 12,
-                               plotOutput("circos", height = 800))),
+                               plotOutput("circos", width=600, height = 600))),
                       fluidRow(
                         column(width = 4,
                                selectInput("chromosome", "Chromosome",
-                                           c(seq(1,22), "X", "Y", "MT")),
+                                           # c(seq(1,22), "X", "Y", "MT")),
+                                           names(dataList$chrFileList)),
+                               # seq(1,22)[seq(1,22) %in% as.numeric(gsub("^chr","", names(dataList[["chrFileList"]])))]
+                               
                                downloadButton('downLoadCircosPdf',"Save .pdf"),
                                downloadButton('downLoadCircosPng',"Save .png"))
                       )
@@ -155,18 +159,23 @@ server <- function(input, output, session) {
     gg.manhattan(gwas, threshold=1e-6, hlight=NULL, col=mypalette, xlims=ranges$x, ylims=c(0,9), title="")
   })
   
+  
+  
   output$circos <- renderPlot({
-    plotCircosByChr(paste0("chr", input$chromosome), dataList)
+    # print(paste0("chr", input$chromosome))
+    plotCircosByChr(input$chromosome, dataList)
+ 
   })
   
   output$downLoadCircosPdf <- downloadHandler(
-    
+
     filename = function() {
-      paste0("chr", input$chromosome, "_circos_", gsub("-", "", Sys.Date()), sep=".pdf")
+      paste0(input$chromosome, "_circos_", gsub("-", "", Sys.Date()), sep=".pdf")
     },
     content = function(file){
-      pdf(file)
-      plotCircosByChr(paste0("chr", input$chromosome), dataList)
+      plotCircosByChr(input$chromosome, dataList)
+      
+    
       dev.off()
     }
   )
@@ -188,8 +197,7 @@ server <- function(input, output, session) {
     gwasBarplot
   })
   
-  
-  
+ 
   
   
   #### ----------------Manhattan Tab -----------------------------
@@ -248,16 +256,16 @@ server <- function(input, output, session) {
   #RDB Catalog track
   observeEvent(input$addRDBScoreTrackButton, {
     print("____Adding RDB Score Track ____")
-    # loadBedTrack(session, id="igvShiny_tracks",trackName="RDB Score", tbl=RDB_score, color="random", deleteTracksOfSameName=FALSE);
-    loadBedGraphTrack(session, 
-                      id="igvShiny_tracks",
-                      trackName="RegulomeDB score", 
-                      tbl=RDB_score, 
-                      color="random",  
-                      # max=maxCADDval,
-                      autoscale=TRUE, 
-                      trackHeight = 75,
-                      deleteTracksOfSameName=FALSE);
+    loadBedTrack(session, id="igvShiny_tracks",trackName="RDB Score", tbl=RDB_score, color="blue", deleteTracksOfSameName=FALSE);
+    # loadBedGraphTrack(session, 
+    #                   id="igvShiny_tracks",
+    #                   trackName="RegulomeDB score", 
+    #                   tbl=RDB_score, 
+    #                   color="random",  
+    #                   # max=maxCADDval,
+    #                   autoscale=TRUE, 
+    #                   trackHeight = 75,
+    #                   deleteTracksOfSameName=FALSE);
   })
   
   #Remove Tracks 
@@ -301,9 +309,9 @@ server <- function(input, output, session) {
       x[10]<- paste0("<a href='https://pubmed.ncbi.nlm.nih.gov/",x[10],"'>", x[10],"</a>")
       x[11] <- "Chr"
     }
-    #CADD score track
-    if (x[1]=="CADD" || x[1]=="RDB"){
-      x[3]<-"rsID"
+    #RBD score track
+    if ( x[1]=="RDB"){
+      x[3]<-"RDB score Info"
     }
 
     attribute.name.positions <- grep("name", names(x))
