@@ -6,44 +6,44 @@ library(tidyr)
 source("scripts/Functions.R")
 getwd()
 #input directories
-inputdir = "/Users/dchilinfuentes/CCBB_projects/shinyGWAS_Repo copy/CCBB_shinyGWAS_Prototype/app/data/FUMA_Results"
-
+# inputdir = "app/data/FUMA_Results"
+inputdir = FUMA_Dir
 ##snps
-FUMA_SNPs_df <- as.data.frame(loadInputFile(inputdir, "snps.txt")) %>%
+gwasBP_FUMA_SNPs_df <- as.data.frame(loadInputFile(inputdir, "snps.txt")) %>%
   dplyr::select(c('uniqID','chr','pos','rsID','non_effect_allele','effect_allele','MAF','gwasP','GenomicLocus','nearestGene',
                   'dist','func','CADD','RDB','minChrState','commonChrState')) 
-row.names(FUMA_SNPs_df) <- FUMA_SNPs_df$rsID
-FUMA_SNPs_df$negLogP <- -log10(FUMA_SNPs_df$gwasP)
+row.names(gwasBP_FUMA_SNPs_df) <- gwasBP_FUMA_SNPs_df$rsID
+gwasBP_FUMA_SNPs_df$negLogP <- -log10(gwasBP_FUMA_SNPs_df$gwasP)
 
 
 #eqt
-fuma_eqtl_df <- as.data.frame(loadInputFile(inputdir, "eqtl.txt"))
-fuma_eqtl_df <- fuma_eqtl_df[order(fuma_eqtl_df$uniqID, decreasing=TRUE),]
-fuma_eqtl_df <- fuma_eqtl_df[!duplicated(fuma_eqtl_df$uniqID),]
-row.names(fuma_eqtl_df) <- fuma_eqtl_df$uniqID
+gwasBP_fuma_eqtl_df <- as.data.frame(loadInputFile(inputdir, "eqtl.txt"))
+gwasBP_fuma_eqtl_df <- gwasBP_fuma_eqtl_df[order(gwasBP_fuma_eqtl_df$uniqID, decreasing=TRUE),]
+gwasBP_fuma_eqtl_df <- gwasBP_fuma_eqtl_df[!duplicated(gwasBP_fuma_eqtl_df$uniqID),]
+row.names(gwasBP_fuma_eqtl_df) <- gwasBP_fuma_eqtl_df$uniqID
 
 #gwas cat
-fuma_gwas_cat <- as.data.frame(loadInputFile(inputdir, "gwascatalog.txt"))
-fuma_gwas_cat <- fuma_gwas_cat[order(fuma_gwas_cat$snp, decreasing=TRUE),]
-fuma_gwas_cat <- fuma_gwas_cat[!duplicated(fuma_gwas_cat$snp),]
-row.names(fuma_gwas_cat) <- fuma_gwas_cat$snp
+gwasBP_fuma_gwas_cat <- as.data.frame(loadInputFile(inputdir, "gwascatalog.txt"))
+gwasBP_fuma_gwas_cat <- gwasBP_fuma_gwas_cat[order(gwasBP_fuma_gwas_cat$snp, decreasing=TRUE),]
+gwasBP_fuma_gwas_cat <- gwasBP_fuma_gwas_cat[!duplicated(gwasBP_fuma_gwas_cat$snp),]
+row.names(gwasBP_fuma_gwas_cat) <- gwasBP_fuma_gwas_cat$snp
 
 FUMA_annot_df = data.frame()
 
-for (focal_loc in unique(FUMA_SNPs_df$GenomicLocus)){ # loop over genomic loci
+for (focal_loc in unique(gwasBP_FUMA_SNPs_df$GenomicLocus)){ # loop over genomic loci
   # focal_loc = 13
   print(focal_loc)
-  focal_df <- subset(FUMA_SNPs_df, GenomicLocus==focal_loc)
+  focal_df <- subset(gwasBP_FUMA_SNPs_df, GenomicLocus==focal_loc)
   print(dim(focal_df))
   # # check if there are any eQTLs
   focal_fuma_id=focal_df$uniqID
   focal_fuma_id
-  index <- which(focal_fuma_id %in% fuma_eqtl_df$uniqID)
+  index <- which(focal_fuma_id %in% gwasBP_fuma_eqtl_df$uniqID)
   intersecting_ids <- focal_df$uniqID[index]
   intersecting_ids
   if (length(intersecting_ids)>0){
     row.names(focal_df) = focal_fuma_id
-    focal_eqtl <- fuma_eqtl_df[intersecting_ids,]
+    focal_eqtl <- gwasBP_fuma_eqtl_df[intersecting_ids,]
     colnames(focal_eqtl)
     #sort by pval
     focal_eqtl <- focal_eqtl[order(focal_eqtl$p),]
@@ -61,16 +61,20 @@ for (focal_loc in unique(FUMA_SNPs_df$GenomicLocus)){ # loop over genomic loci
     focal_df_intIDs$top_gwas_cat_context <-NA
     #add NAs to the remainder of that focal df
     focal_df_noIntIDs <- focal_df[!rownames(focal_df) %in% intersecting_ids, ]  # Extract rows from data
+    focal_df_noIntIDs
     # focal_df_noIntIDs <- focal_df_noIntIDs[!duplicated(focal_df_noIntIDs$snp),]
-    
-    focal_df_noIntIDs$top_eQTL_pval<- NA
-    focal_df_noIntIDs$top_eQTL_tissue<-NA
-    focal_df_noIntIDs$top_eQTL_gene<-NA   
-    focal_df_noIntIDs$top_gwas_cat_pval<- NA
-    focal_df_noIntIDs$top_gwas_cat_trait<-NA
-    focal_df_noIntIDs$top_gwas_cat_PMID<-NA
-    focal_df_noIntIDs$top_gwas_cat_context <-NA
-    focal_df <- rbind(focal_df_intIDs, focal_df_noIntIDs) #merge
+    if (dim(focal_df_noIntIDs)[1] != 0) {
+      focal_df_noIntIDs$top_eQTL_pval<- NA
+      focal_df_noIntIDs$top_eQTL_tissue<-NA
+      focal_df_noIntIDs$top_eQTL_gene<-NA   
+      focal_df_noIntIDs$top_gwas_cat_pval<- NA
+      focal_df_noIntIDs$top_gwas_cat_trait<-NA
+      focal_df_noIntIDs$top_gwas_cat_PMID<-NA
+      focal_df_noIntIDs$top_gwas_cat_context <-NA
+      focal_df <- rbind(focal_df_intIDs, focal_df_noIntIDs) #merge
+    }else(
+      focal_df <- focal_df_intIDs #merge
+    )
   }else{
     focal_df$top_eQTL_pval<- NA
     focal_df$top_eQTL_tissue<-NA
@@ -79,16 +83,16 @@ for (focal_loc in unique(FUMA_SNPs_df$GenomicLocus)){ # loop over genomic loci
     focal_df$top_gwas_cat_trait<-NA
     focal_df$top_gwas_cat_PMID<-NA
     focal_df$top_gwas_cat_context <-NA
-    
+
   }
   # # check if there are any prior hits in GWAS catalog
   focal_fuma_id=focal_df$rsID
-  index <- which(focal_df$rsID %in% fuma_gwas_cat$snp)
+  index <- which(focal_df$rsID %in% gwasBP_fuma_gwas_cat$snp)
   intersecting_ids <- focal_df$rsID[index]
   intersecting_ids
   if (length(intersecting_ids)>0){
     row.names(focal_df) <- focal_df$rsID
-    focal_gwas_cat <- fuma_gwas_cat[intersecting_ids,]
+    focal_gwas_cat <- gwasBP_fuma_gwas_cat[intersecting_ids,]
     #sort
     focal_gwas_cat <- focal_gwas_cat[order(focal_gwas_cat$P),]
     #reshape focal df
@@ -117,10 +121,13 @@ for (focal_loc in unique(FUMA_SNPs_df$GenomicLocus)){ # loop over genomic loci
     focal_df <- rbind(focal_df, focal_df_gwas)
     
   }else{
-    focal_df$top_gwas_cat_pval<- NA
-    focal_df$top_gwas_cat_trait<-NA
-    focal_df$top_gwas_cat_PMID<-NA
-    focal_df$top_gwas_cat_context <-NA
+    focal_df_intIDs_GWAS$top_eQTL_pval<- NA
+    focal_df_intIDs_GWAS$top_eQTL_tissue<-NA
+    focal_df_intIDs_GWAS$top_eQTL_gene<-NA
+    focal_df_intIDs_GWAS$top_gwas_cat_pval<- NA
+    focal_df_intIDs_GWAS$top_gwas_cat_trait<-NA
+    focal_df_intIDs_GWAS$top_gwas_cat_PMID<-NA
+    focal_df_intIDs_GWAS$top_gwas_cat_context <-NA
     
   }
   FUMA_annot_df <- rbind(FUMA_annot_df, focal_df)
@@ -135,7 +142,9 @@ test <- na.omit(FUMA_annot_plot)
 gwasBarplot <- ggplot(test, aes(x=factor(top_gwas_cat_trait), fill=factor(GenomicLocus))) +
   geom_bar(position="stack") +
   theme_classic() +
-  theme(legend.position="bottom") +
+  theme(legend.position=c(0.75,0.78)) +
+  theme(legend.direction = "horizontal") +
+  # theme(legend.position="bottom", legend.direction = "horizontal", legend.justification = 'left') +
   theme(legend.text = element_text( size = 7))+
   # ylim(0, 20) +
   xlab("Top GWAS Catalog Trait") +
