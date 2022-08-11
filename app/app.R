@@ -168,14 +168,13 @@ server <- function(input, output, session) {
   })
   
   output$downLoadCircosPdf <- downloadHandler(
-
+    
     filename = function() {
       paste0(input$chromosome, "_circos_", gsub("-", "", Sys.Date()), sep=".pdf")
     },
     content = function(file){
+      pdf(file)
       plotCircosByChr(input$chromosome, dataList)
-      
-    
       dev.off()
     }
   )
@@ -183,11 +182,11 @@ server <- function(input, output, session) {
   output$downLoadCircosPng <- downloadHandler(
     
     filename = function() {
-      paste0("chr", input$chromosome, "_circos_", gsub("-", "", Sys.Date()), sep=".png")
+      paste0(input$chromosome, "_circos_", gsub("-", "", Sys.Date()), sep=".png")
     },
     content = function(file){
       png(file, width = 3000, height = 3000, units = "px", res = 300)
-      plotCircosByChr(paste0("chr", input$chromosome), dataList)
+      plotCircosByChr(input$chromosome, dataList)
       dev.off()
     }
   )
