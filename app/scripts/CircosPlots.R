@@ -25,13 +25,21 @@ gns_all <- as.data.frame(fread(file="data/FUMA_Results/genes.txt", sep="\t", hea
 tmp_loci <- as.numeric(unlist(lapply(strsplit(as.character(gns_all[["GenomicLocus"]]), ":"), function(x) x[[1]])))
 gns_all_filt <- cbind.data.frame(gns_all[,c(3,4,5,2)], Loci=tmp_loci, ENS=as.character(gns_all[,1]))
 gns_all_filt[,1] <- paste0("chr", gns_all_filt[,1])
-gns_all_filt_inp <- gns_all_filt[gns_all_filt$chr %in% loci_all_filt$chr,-5]
-gns_all_filt_inp$ENS <- as.character(gns_all_filt_inp$ENS)
-gns_all_filt_inp$V5 <- "id=0"
-gns_all_filt_inp$V5[which(gns_all$ciMap == "Yes")] <- "id=1"
+gns_all_filt$V5 <- "id=0"
+gns_all_filt$V5[which(gns_all$ciMap == "Yes")] <- "id=1"
 if(sum(colnames(gns_all) %in% "eqtlMapSNPs") > 0) {
-  gns_all_filt_inp$V5[which(gns_all$eqtlMapSNPs > 0 & gns_all$ciMap == "Yes")] <- "id=2" 
+  gns_all_filt$V5[which(gns_all$eqtlMapSNPs > 0 & gns_all$ciMap == "Yes")] <- "id=2" 
 }
+gns_all_filt_inp <- do.call(rbind.data.frame,as.list(apply(gns_all_filt, 1, function(x) {
+  if(x[1] %in% loci_all_filt$chr) {
+    tmp.loci <- loci_all_filt[loci_all_filt$chr %in% x[1],,drop=FALSE]
+    if(as.numeric(x[5]) %in% as.numeric(tmp.loci$GenomicLocus)) {
+      return(x[-5])
+    }
+  }
+})))    
+colnames(gns_all_filt_inp) <- colnames(gns_all_filt)[-5]
+gns_all_filt_inp$ENS <- as.character(gns_all_filt_inp$ENS)
 rm(gns_all)
 
 # Load ci data
