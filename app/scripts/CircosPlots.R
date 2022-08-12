@@ -48,6 +48,7 @@ if(ncol(ci_all) >= 11) {
   ci_all <- ci_all[ci_all[,11] == 1,]
 }
 ci_all_filt <- ci_all[ci_all[,8] == "intra",]
+ci_all_filt <- ci_all_filt[!duplicated(ci_all_filt[,1:3]),]
 rm(ci_all)
 
 # Load eqtl data
@@ -91,7 +92,7 @@ ci_all_filt_pos <- cbind.data.frame(ci_all_filt[,1], do.call(rbind.data.frame,
 ci_all_filt_pos <- cbind.data.frame(ci_all_filt_pos[,1:2],
                                     apply(ci_all_filt_pos[,3:4],2, as.numeric),
                                     ci_all_filt_pos[,5],
-                                    apply(ci_all_filt_pos[,3:4],2, as.numeric),
+                                    apply(ci_all_filt_pos[,6:7],2, as.numeric),
                                     rep("dark orange", nrow(ci_all_filt_pos)))
 colnames(ci_all_filt_pos) <- paste0("V", seq(1:ncol(ci_all_filt_pos)))
 ci_all_filt_pos <- ci_all_filt_pos[order(ci_all_filt_pos[,8]),]
